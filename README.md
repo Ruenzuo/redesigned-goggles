@@ -10,6 +10,18 @@
 clang -c bar.c -o bar.o # create object file
 libtool -dynamic bar.o -o libfoo_dynamic.dylib -framework CoreFoundation -lSystem -macosx_version_min 10.11 # create dynamic library
 install_name_tool -id "@rpath/../libfoo_dynamic/libfoo_dynamic.dylib" libfoo_dynamic.dylib # change the install name
+
+otool -L libfoo_dynamic.dylib
+libfoo_dynamic.dylib:
+  @rpath/../libfoo_dynamic/libfoo_dynamic.dylib (compatibility version 0.0.0, current version 0.0.0)
+  /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1258.1.0)
+  /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+nm libfoo_dynamic.dylib
+                 U _CFShow
+                 U ___CFConstantStringClassReference
+0000000000000f70 T _fizz
+                 U dyld_stub_binder
 ```
 
 ### Building libaba_dynamic
@@ -18,6 +30,20 @@ install_name_tool -id "@rpath/../libfoo_dynamic/libfoo_dynamic.dylib" libfoo_dyn
 clang -c aba.c -o aba.o -I ../libfoo_dynamic/ # create object file
 libtool -dynamic aba.o -o libaba_dynamic.dylib -framework CoreFoundation -lSystem -L../libfoo_dynamic/ -lfoo_dynamic -macosx_version_min 10.11 # create dynamic library
 install_name_tool -id "@rpath/../libaba_dynamic/libaba_dynamic.dylib" libaba_dynamic.dylib # change the install name
+
+otool -L libaba_dynamic.dylib
+libaba_dynamic.dylib:
+  @rpath/../libaba_dynamic/libaba_dynamic.dylib (compatibility version 0.0.0, current version 0.0.0)
+  /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1258.1.0)
+  /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+  @rpath/../libfoo_dynamic/libfoo_dynamic.dylib (compatibility version 0.0.0, current version 0.0.0)
+
+nm libaba_dynamic.dylib
+                 U _CFShow
+                 U ___CFConstantStringClassReference
+0000000000000f50 T _aba
+                 U _fizz
+                 U dyld_stub_binder
 ```
 
 ### Building main
